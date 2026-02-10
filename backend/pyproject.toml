@@ -1,0 +1,15 @@
+[project]
+name = "photo-retriever-backend"
+version = "0.1.0"
+description = "Backend API for intelligent photo retrieval system"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic-settings>=2.0.0",
+    "structlog>=23.2.0",
+]
+
+[tool.uv]
+dev-dependencies = []
+
