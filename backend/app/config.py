@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     # Database
     mongodb_url: str = "mongodb://localhost:27017/photo_retriever"
 
+    # Vector Store
+    pinecone_api_key: str = ""
+    pinecone_env: str = "us-west1-gcp-free"
+    pinecone_index_name: str = "photos"
+
     # Security
     jwt_secret_key: str = "CHANGE_THIS_IN_PRODUCTION"
     jwt_algorithm: str = "HS256"

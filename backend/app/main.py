@@ -21,12 +21,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     # Startup
     configure_logging(settings.log_level)
-    from app.core.database import init_db
+    from app.core.database import init_db, db
     await init_db()
+    
+    # Check connections
+    mongo_status = "Connected" if db.client else "Failed"
+    pinecone_status = "Connected" if db.pinecone else "Not Configured/Failed"
+    
     logger.info(
         "application_startup",
         app_name=settings.app_name,
         environment=settings.environment,
+        mongo_status=mongo_status,
+        pinecone_vector_db=pinecone_status,
     )
     
     yield

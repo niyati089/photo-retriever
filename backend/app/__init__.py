@@ -1,1 +1,0 @@
-"""Photo Retriever Backend Application."""
