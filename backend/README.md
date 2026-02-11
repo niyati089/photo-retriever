@@ -83,6 +83,23 @@ This is Phase 1 (Day 2-3) - Backend Framework Setup. Future additions will inclu
 - Face detection & matching logic
 - Photo upload & retrieval endpoints
 
+## Database Setup (MongoDB)
+
+### 1. Local MongoDB
+Ensure MongoDB is running on `localhost:27017`.
+The default connection string is configured in `.env`.
+
+### 2. MongoDB Atlas (Cloud)
+1. Go to your [MongoDB Atlas Dashboard](https://cloud.mongodb.com/).
+2. Navigate to **Database** > **Connect**.
+3. Select **Drivers** > **Python** > **3.12 or later**.
+4. Copy the connection string.
+5. Update your `.env` file:
+   ```bash
+   MONGODB_URL="mongodb+srv://<username>:<password>@<cluster>.mongodb.net/photo_retriever?retryWrites=true&w=majority"
+   ```
+   *Replace `<username>`, `<password>`, and `<cluster>` with your actual details.*
+
 ## Development Notes
 
 - All environment variables are loaded via `pydantic-settings`

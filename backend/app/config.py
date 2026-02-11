@@ -29,6 +29,14 @@ class Settings(BaseSettings):
         """Parse CORS origins from comma-separated string."""
         return [origin.strip() for origin in self.cors_origins.split(",")]
 
+    # Database
+    mongodb_url: str = "mongodb://localhost:27017/photo_retriever"
+
+    # Security
+    jwt_secret_key: str = "CHANGE_THIS_IN_PRODUCTION"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+
 
 # Global settings instance
 settings = Settings()

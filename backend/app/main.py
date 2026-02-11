@@ -21,6 +21,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     # Startup
     configure_logging(settings.log_level)
+    from app.core.database import init_db
+    await init_db()
     logger.info(
         "application_startup",
         app_name=settings.app_name,
@@ -51,7 +53,10 @@ app.add_middleware(
 )
 
 # Register routers
-app.include_router(health_router)
+app.include_router(health_router, tags=["Health"])
+from app.routes import auth, users
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+app.include_router(users.router, prefix="/users", tags=["Users"])
 
 
 @app.get("/")
