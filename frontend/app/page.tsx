@@ -1,15 +1,22 @@
-
-
+"use client";
 /**
  * Home/Landing Page
  */
 
-
+import { useEffect } from "react";
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Button from '@/components/ui/Button';
 
 export default function HomePage() {
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/health")
+      .then(res => res.json())
+      .then(data => console.log(data))
+      .catch(err => console.error(err));
+  }, []);
+
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar showAuthButtons />

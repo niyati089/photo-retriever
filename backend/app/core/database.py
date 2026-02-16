@@ -26,6 +26,9 @@ async def init_mongo():
         db.client = AsyncIOMotorClient(settings.mongodb_url)
         # Verify connection
         await db.client.admin.command('ping')
+        db.database = db.client.photo_retriever
+        db.test_collection = db.database["test_collection"]
+
         logger.info("Successfully connected to MongoDB")
         
         await init_beanie(

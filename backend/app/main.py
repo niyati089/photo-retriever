@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     
     # Check connections
     mongo_status = "Connected" if db.client else "Failed"
-    pinecone_status = "Connected" if db.pinecone else "Not Configured/Failed"
+    pinecone_status = "Connected" if db.pinecone_index else "Not Configured/Failed"
     
     logger.info(
         "application_startup",
@@ -64,6 +64,12 @@ app.include_router(health_router, tags=["Health"])
 from app.routes import auth, users
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/users", tags=["Users"])
+from app.routes.test_db import router as test_router
+app.include_router(test_router, tags=["Testing"])
+from app.routes.test_pinecone import router as pinecone_test_router
+app.include_router(pinecone_test_router, tags=["Testing"])
+
+
 
 
 @app.get("/")

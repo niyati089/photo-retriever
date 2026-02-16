@@ -1,28 +1,52 @@
-from typing import Annotated
-from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-from app.core.security import create_access_token, verify_password
-from app.models.user import User
-from app.schemas.token import Token
-from app.config import settings
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
+from app.core.security import (
+    create_access_token,
+    hash_password,
+    verify_password,
+    verify_token
+)
+
 
 router = APIRouter()
 
-@router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    """
-    OAuth2 compatible token login, get an access token for future requests.
-    """
-    user = await User.find_one(User.email == form_data.username)
-    if not user or not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
-    access_token = create_access_token(
-        subject=user.email, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+# Temporary fake user
+fake_user = {
+    "email": "admin@example.com",
+    "hashed_password": hash_password("password123"),
+    "role": "admin"
+}
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+@router.post("/login")
+def login(data: LoginRequest):
+
+    fake_user = {
+        "email": "admin@example.com",
+        "password": "password123",
+        "role": "admin"
+    }
+
+    if data.email != fake_user["email"] or data.password != fake_user["password"]:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_access_token({
+        "sub": data.email,
+        "role": fake_user["role"]
+    })
+
+    return {"access_token": token}
+
+
+
+@router.get("/protected")
+def protected(user=Depends(verify_token)):
+    return {
+        "message": "Access granted",
+        "user": user
+    }

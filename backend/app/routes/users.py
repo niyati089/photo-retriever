@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
-from app.core.security import get_password_hash
+from app.core.security import hash_password
 from app.api.deps import get_current_active_user
 
 router = APIRouter()
@@ -17,7 +17,7 @@ async def create_user(user_in: UserCreate):
             status_code=400,
             detail="The user with this email already exists in the system.",
         )
-    hashed_password = get_password_hash(user_in.password)
+    hashed_password = hash_password(user.password)
     user = User(
         email=user_in.email,
         hashed_password=hashed_password,
