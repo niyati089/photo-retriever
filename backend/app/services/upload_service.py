@@ -8,6 +8,7 @@ from typing import List, Tuple
 from fastapi import UploadFile, HTTPException
 from app.config import settings
 from app.models.event import Event
+from app.models.user import User
 from app.models.image import ImageMetadata
 from app.core.logging import get_logger
 
@@ -24,10 +25,14 @@ class UploadService:
         total_uploaded = 0
         failed_files = []
 
-        # Ensure event exists
+        # Ensure event and user exist
         event = await Event.get(event_id)
         if not event:
             raise HTTPException(status_code=404, detail=f"Event {event_id} not found")
+            
+        user = await User.get(photographer_id)
+        if not user:
+            raise HTTPException(status_code=404, detail=f"User {photographer_id} not found")
 
         # Create event raw directory
         event_raw_dir = os.path.join(self.base_upload_dir, "events", event_id, "raw")
@@ -37,12 +42,12 @@ class UploadService:
             file_ext = os.path.splitext(file.filename)[1].lower()
             
             if file_ext == ".zip":
-                uploaded, failed = await self._process_zip(file, event_id, event_raw_dir, photographer_id)
+                uploaded, failed = await self._process_zip(file, event, event_raw_dir, user)
                 total_uploaded += uploaded
                 failed_files.extend(failed)
             elif file_ext in ALLOWED_EXTENSIONS:
                 try:
-                    await self._save_image(file, event_id, event_raw_dir, photographer_id)
+                    await self._save_image(file, event, event_raw_dir, user)
                     total_uploaded += 1
                 except Exception as e:
                     logger.error(f"Failed to save image {file.filename}: {e}")
@@ -52,7 +57,7 @@ class UploadService:
 
         return total_uploaded, failed_files
 
-    async def _save_image(self, file: UploadFile, event_id: str, target_dir: str, photographer_id: str) -> None:
+    async def _save_image(self, file: UploadFile, event: Event, target_dir: str, photographer: User) -> None:
         """Saves a single image and creates DB entry."""
         # Generate unique filename to avoid collisions
         unique_name = f"{uuid.uuid4()}{os.path.splitext(file.filename)[1].lower()}"
@@ -64,15 +69,15 @@ class UploadService:
 
         # Create DB entry
         metadata = ImageMetadata(
-            event_id=event_id,
+            event_id=event,
             file_name=file.filename,
             file_path=file_path,
-            photographer_id=photographer_id,
+            photographer_id=photographer,
             status="UPLOADED"
         )
         await metadata.insert()
 
-    async def _process_zip(self, zip_file: UploadFile, event_id: str, target_dir: str, photographer_id: str) -> Tuple[int, List[str]]:
+    async def _process_zip(self, zip_file: UploadFile, event: Event, target_dir: str, photographer: User) -> Tuple[int, List[str]]:
         """Extracts ZIP and processes images within."""
         uploaded_count = 0
         failed_files = []
@@ -108,10 +113,10 @@ class UploadService:
                                 
                                 # DB entry
                                 metadata = ImageMetadata(
-                                    event_id=event_id,
+                                    event_id=event,
                                     file_name=filename,
                                     file_path=dest_path,
-                                    photographer_id=photographer_id,
+                                    photographer_id=photographer,
                                     status="UPLOADED"
                                 )
                                 await metadata.insert()

@@ -1,11 +1,13 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request, Security
 from app.api.deps import get_current_active_user, RoleChecker
 from app.models.user import User
 from app.models.event import Event
 from app.schemas.media import UploadResponse, ErrorResponse
 from app.services.upload_service import upload_service
 from app.config import settings
+from app.api.deps import oauth2_scheme
+
 
 router = APIRouter()
 
@@ -16,8 +18,9 @@ async def bulk_upload(
     event_id: str,
     request: Request,
     files: List[UploadFile] = File(...),
-    current_user: User = Depends(allow_photographer)
+    current_user: User = Security(allow_photographer)
 ):
+
     """
     Bulk upload images or ZIP files for a specific event.
     Requires photographer or admin role.
@@ -52,9 +55,12 @@ async def bulk_upload(
         status="UPLOAD_COMPLETED"
     )
 
-# Internal helper route to create an event for testing (Optional but useful)
-@router.post("/events", status_code=201, dependencies=[Depends(allow_photographer)])
-async def create_event(name: str, current_user: User = Depends(allow_photographer)):
-    event = Event(name=name, photographer_id=current_user.id) # type: ignore
+# Helper route to create an event
+@router.post("/", status_code=201)
+async def create_event(
+    name: str,
+    current_user: User = Depends(allow_photographer)
+):
+    event = Event(name=name, photographer_id=current_user.id)
     await event.insert()
     return {"id": str(event.id), "name": event.name}

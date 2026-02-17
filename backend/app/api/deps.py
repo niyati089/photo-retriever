@@ -7,9 +7,11 @@ from app.config import settings
 from app.models.user import User
 from app.schemas.token import TokenPayload
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
+    print("TOKEN IN get_current_user:", token)
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -36,10 +38,10 @@ async def get_current_active_user(current_user: Annotated[User, Depends(get_curr
 
 class RoleChecker:
     def __init__(self, allowed_roles: list[str]):
-        self.allowed_roles = allowed_roles
+        self.allowed_roles = [role.lower() for role in allowed_roles]
 
     def __call__(self, user: Annotated[User, Depends(get_current_active_user)]):
-        if user.role not in self.allowed_roles:
+        if user.role.lower() not in self.allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Operation not permitted",

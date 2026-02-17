@@ -17,14 +17,14 @@ async def create_user(user_in: UserCreate):
             status_code=400,
             detail="The user with this email already exists in the system.",
         )
-    hashed_password = hash_password(user.password)
+    hashed_password = hash_password(user_in.password)
     user = User(
         email=user_in.email,
         hashed_password=hashed_password,
         full_name=user_in.full_name,
         role=user_in.role,
     )
-    await user.create()
+    await user.insert()
     return user
 
 @router.get("/me", response_model=UserResponse)
