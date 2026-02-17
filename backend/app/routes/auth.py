@@ -10,13 +10,6 @@ from app.core.security import (
 
 router = APIRouter()
 
-# Temporary fake user
-fake_user = {
-    "email": "admin@example.com",
-    "hashed_password": hash_password("password123"),
-    "role": "admin"
-}
-
 
 class LoginRequest(BaseModel):
     email: str

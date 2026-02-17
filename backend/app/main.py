@@ -68,6 +68,8 @@ from app.routes.test_db import router as test_router
 app.include_router(test_router, tags=["Testing"])
 from app.routes.test_pinecone import router as pinecone_test_router
 app.include_router(pinecone_test_router, tags=["Testing"])
+from app.routes import media
+app.include_router(media.router, prefix="/api/v1/events", tags=["Media"])
 
 
 

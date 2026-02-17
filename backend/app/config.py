@@ -42,6 +42,10 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
+    # Uploads
+    upload_dir: str = "media"
+    max_upload_size: int = 100 * 1024 * 1024  # 100MB default
+
 
 # Global settings instance
 settings = Settings()

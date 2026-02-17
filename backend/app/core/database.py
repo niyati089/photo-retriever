@@ -9,6 +9,8 @@ except ImportError:
 from app.config import settings
 from app.models.user import User
 from app.models.photo import Photo
+from app.models.event import Event
+from app.models.image import ImageMetadata
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -36,6 +38,8 @@ async def init_mongo():
             document_models=[
                 User,
                 Photo,
+                Event,
+                ImageMetadata,
             ]
         )
     except Exception as e:
